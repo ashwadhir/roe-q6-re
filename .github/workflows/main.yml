@@ -1,0 +1,45 @@
+# Name of the workflow
+name: Matrix Build with Artifacts
+
+# Run this workflow on every push
+on: [push]
+
+jobs:
+  build:
+    # Run on the latest Ubuntu
+    runs-on: ubuntu-latest
+    
+    # --- Matrix Strategy ---
+    # This creates 3 parallel jobs for 3 Python versions
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11'] # At least 3 variants
+
+    steps:
+      # Step 1: Check out the repository's code
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the specific Python version for this job
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # --- Step Identifier Requirement ---
+      - name: matrix-4f143ea
+        run: echo "Building for Python ${{ matrix.python-version }}"
+
+      # --- Build Artifact Requirement ---
+      - name: Generate build artifact
+        # Create a unique, non-empty file for this job
+        run: echo "Build output for ${{ matrix.python-version }}" > build-output-py${{ matrix.python-version }}.txt
+
+      # --- Artifact Upload Requirement ---
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Name with prefix: build-4f143ea-<variant>
+          name: build-4f143ea-py${{ matrix.python-version }}
+          # Path to the file we just created
+          path: build-output-py${{ matrix.python-version }}.txt
